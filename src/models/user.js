@@ -23,6 +23,18 @@ class User {
     });
   }
 
+  static async getByUsernameOrEmail(username = null, email = null) {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [username ? { username } : null, email ? { email } : null].filter(
+          Boolean
+        ),
+      },
+    });
+
+    return user;
+  }
+
   static async create(data) {
     return prisma.user.create({
       data: data,

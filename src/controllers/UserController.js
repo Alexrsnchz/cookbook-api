@@ -39,21 +39,23 @@ class UserController {
 
     try {
       const validatedData = userRegisterSchema.parse(data);
-      const [usernameExists, emailExists] = Promise.all([
-        User.getByUsername(validatedData.username),
-        User.getByEmail(validatedData.email),
-      ]);
+      const existentData = await User.getByUsernameOrEmail(
+        validatedData.username,
+        validatedData.email
+      );
 
-      if (usernameExists) {
-        return res
-          .status(409)
-          .json({ message: 'That username is already registered' });
-      }
+      if (existentData) {
+        if (existentData.username === validatedData.username) {
+          return res
+            .status(409)
+            .json({ message: 'That username is already registered' });
+        }
 
-      if (emailExists) {
-        return res
-          .status(409)
-          .json({ message: 'That email is already registered' });
+        if (existentData.email === validatedData.email) {
+          return res
+            .status(409)
+            .json({ message: 'That email is already registered' });
+        }
       }
 
       const saltRounds = 10;
