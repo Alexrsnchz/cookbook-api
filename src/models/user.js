@@ -11,6 +11,12 @@ class User {
     });
   }
 
+  static async getByUsername(username) {
+    return prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
   static async getByEmail(email) {
     return prisma.user.findUnique({
       where: { email },

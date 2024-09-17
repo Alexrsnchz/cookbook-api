@@ -1,4 +1,9 @@
 import User from '../models/User.js';
+import {
+  userRegisterSchema,
+  userUpdateSchema,
+} from '../validations/UserSchema.js';
+import bcrypt from 'bcrypt';
 
 class UserController {
   static async getAllUsers(req, res) {
@@ -33,11 +38,39 @@ class UserController {
     const data = req.body;
 
     try {
-      await User.create(data);
+      const validatedData = userRegisterSchema.parse(data);
+      const [usernameExists, emailExists] = Promise.all([
+        User.getByUsername(validatedData.username),
+        User.getByEmail(validatedData.email),
+      ]);
+
+      if (usernameExists) {
+        return res
+          .status(409)
+          .json({ message: 'That username is already registered' });
+      }
+
+      if (emailExists) {
+        return res
+          .status(409)
+          .json({ message: 'That email is already registered' });
+      }
+
+      const saltRounds = 10;
+      const hash = await bcrypt.hash(validatedData.password, saltRounds);
+
+      validatedData.password = hash;
+
+      await User.create(validatedData);
 
       return res.status(201).json({ message: 'User registered' });
     } catch (error) {
       console.error(error);
+
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+
       return res.status(500).json({ message: 'Error registering user' });
     }
   }
@@ -49,7 +82,8 @@ class UserController {
     const data = req.body;
 
     try {
-      const user = await User.update(Number(id), data);
+      const validatedData = userUpdateSchema.parse(data);
+      const user = await User.update(Number(id), validatedData);
 
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
