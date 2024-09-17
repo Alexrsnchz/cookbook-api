@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import {
   userRegisterSchema,
+  userLoginSchema,
   userUpdateSchema,
 } from '../validations/UserSchema.js';
 import bcrypt from 'bcrypt';
@@ -77,7 +78,34 @@ class UserController {
     }
   }
 
-  static async login(req, res) {}
+  static async login(req, res) {
+    const data = req.body;
+
+    try {
+      const validatedData = userLoginSchema.parse(data);
+      const existingData = await User.getByUsernameOrEmail(
+        null,
+        validatedData.email
+      );
+
+      if (
+        !existingData ||
+        !(await bcrypt.compare(validatedData.password, existingData.password))
+      ) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      return res.status(200).json({ message: 'User logged in' });
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+
+      return res.status(500).json({ message: 'Error loggin in user' });
+    }
+  }
 
   static async updateUser(req, res) {
     const { id } = req.params;

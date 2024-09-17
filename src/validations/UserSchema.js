@@ -10,7 +10,8 @@ export const baseUserSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .max(244, 'What is this email...?')
-    .email('Email is invalid'),
+    .email('Email is invalid')
+    .toLowerCase(),
   password: z
     .string()
     .min(1, 'Password is required')
@@ -29,7 +30,7 @@ export const userRegisterSchema = baseUserSchema.pick({
 });
 
 export const userLoginSchema = z.object({
-  email: z.string(),
+  email: z.string().toLowerCase(),
   password: z.string(),
 });
 
