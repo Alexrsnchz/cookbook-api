@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(corsMiddleware);
 app.use(cookieParser());
 
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
