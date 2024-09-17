@@ -5,6 +5,10 @@ import {
   userUpdateSchema,
 } from '../validations/UserSchema.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import config from '../config/settings.js';
+
+const { JWT_SECRET_KEY } = config;
 
 class UserController {
   static async getAllUsers(req, res) {
@@ -14,7 +18,9 @@ class UserController {
       return res.status(200).json(users);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Error fetching users' });
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'Error fetching users' });
     }
   }
 
@@ -25,13 +31,17 @@ class UserController {
       const user = await User.getById(Number(id));
 
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res
+          .status(404)
+          .json({ status: 'error', message: 'User not found' });
       }
 
       return res.status(200).json(user);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Error fetching user' });
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'Error fetching user' });
     }
   }
 
@@ -47,15 +57,17 @@ class UserController {
 
       if (existentData) {
         if (existentData.username === validatedData.username) {
-          return res
-            .status(409)
-            .json({ message: 'That username is already registered' });
+          return res.status(409).json({
+            status: 'error',
+            message: 'That username is already registered',
+          });
         }
 
         if (existentData.email === validatedData.email) {
-          return res
-            .status(409)
-            .json({ message: 'That email is already registered' });
+          return res.status(409).json({
+            status: 'error',
+            message: 'That email is already registered',
+          });
         }
       }
 
@@ -64,17 +76,31 @@ class UserController {
 
       validatedData.password = hash;
 
-      await User.create(validatedData);
+      const user = await User.create(validatedData);
 
-      return res.status(201).json({ message: 'User registered' });
+      const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET_KEY, {
+        expiresIn: '1h',
+      });
+
+      return res
+        .status(201)
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 3600000,
+          sameSite: 'none',
+        })
+        .json({ status: 'success', message: 'User registered' });
     } catch (error) {
       console.error(error);
 
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors });
+        return res.status(400).json({ status: 'error', message: error.errors });
       }
 
-      return res.status(500).json({ message: 'Error registering user' });
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'Error registering user' });
     }
   }
 
@@ -92,18 +118,38 @@ class UserController {
         !existingData ||
         !(await bcrypt.compare(validatedData.password, existingData.password))
       ) {
-        return res.status(401).json({ message: 'Invalid email or password' });
+        return res
+          .status(401)
+          .json({ status: 'error', message: 'Invalid email or password' });
       }
 
-      return res.status(200).json({ message: 'User logged in' });
+      const token = jwt.sign(
+        { id: existingData.id, role: existingData.role },
+        JWT_SECRET_KEY,
+        {
+          expiresIn: '1h',
+        }
+      );
+
+      return res
+        .status(200)
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 3600000,
+          sameSite: 'none',
+        })
+        .json({ status: 'success', message: 'User logged in' });
     } catch (error) {
       console.error(error);
 
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors });
+        return res.status(400).json({ status: 'error', message: error.errors });
       }
 
-      return res.status(500).json({ message: 'Error loggin in user' });
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'Error loggin in user' });
     }
   }
 
@@ -116,13 +162,19 @@ class UserController {
       const user = await User.update(Number(id), validatedData);
 
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res
+          .status(404)
+          .json({ status: 'error', message: 'User not found' });
       }
 
-      return res.status(200).json({ message: 'User updated' });
+      return res
+        .status(200)
+        .json({ status: 'success', message: 'User updated' });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Error updating user' });
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'Error updating user' });
     }
   }
 
@@ -133,13 +185,17 @@ class UserController {
       const user = await User.delete(Number(id));
 
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res
+          .status(404)
+          .json({ status: 'error', message: 'User not found' });
       }
 
       return res.status(204).send();
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Error deleting user' });
+      return res
+        .status(500)
+        .json({ status: 'error', message: 'Error deleting user' });
     }
   }
 }
