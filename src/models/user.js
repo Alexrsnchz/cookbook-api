@@ -11,18 +11,6 @@ class User {
     });
   }
 
-  static async getByUsername(username) {
-    return prisma.user.findUnique({
-      where: { username },
-    });
-  }
-
-  static async getByEmail(email) {
-    return prisma.user.findUnique({
-      where: { email },
-    });
-  }
-
   static async getByUsernameOrEmail(username = null, email = null) {
     const user = await prisma.user.findFirst({
       where: {
@@ -49,9 +37,17 @@ class User {
   }
 
   static async delete(id) {
-    return prisma.user.delete({
-      where: { id },
-    });
+    try {
+      return await prisma.user.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        return null;
+      }
+
+      throw error;
+    }
   }
 }
 

@@ -8,6 +8,9 @@
     "dev": "node src/index.js",
     "test": "jest"
   },
+  "jest": {
+    "transform": {}
+  },
   "author": "Alexrsnch",
   "license": "ISC",
   "dependencies": {

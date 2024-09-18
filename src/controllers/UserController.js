@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import { z } from 'zod';
 import {
   userRegisterSchema,
   userLoginSchema,
@@ -95,7 +96,13 @@ class UserController {
       console.error(error);
 
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ status: 'error', message: error.errors });
+        const formattedErrors = error.errors.map((err) => ({
+          message: err.message,
+          path: err.path,
+        }));
+        return res
+          .status(400)
+          .json({ status: 'error', message: formattedErrors });
       }
 
       return res
@@ -144,7 +151,13 @@ class UserController {
       console.error(error);
 
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ status: 'error', message: error.errors });
+        const formattedErrors = error.errors.map((err) => ({
+          message: err.message,
+          path: err.path,
+        }));
+        return res
+          .status(400)
+          .json({ status: 'error', message: formattedErrors });
       }
 
       return res

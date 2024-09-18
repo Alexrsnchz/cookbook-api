@@ -18,7 +18,7 @@ export const baseUserSchema = z.object({
     .min(8, 'Password must be at least 8 characters long')
     .max(255, 'Pretty safe but cannot exceed 255 characters')
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).*$/,
       'Password must contain lowercase letters, uppercase letters, numbers, and symbols'
     ),
 });
