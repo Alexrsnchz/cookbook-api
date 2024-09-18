@@ -78,6 +78,7 @@ class UserController {
       validatedData.password = hash;
 
       const user = await User.create(validatedData);
+      const { password, ...userWithoutPassword } = user;
 
       const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET_KEY, {
         expiresIn: '1h',
@@ -91,7 +92,7 @@ class UserController {
           maxAge: 3600000,
           sameSite: 'none',
         })
-        .json({ status: 'success', message: 'User registered' });
+        .json(userWithoutPassword);
     } catch (error) {
       console.error(error);
 
@@ -173,6 +174,7 @@ class UserController {
     try {
       const validatedData = userUpdateSchema.parse(data);
       const user = await User.update(Number(id), validatedData);
+      const { password, ...userWithoutPassword } = user;
 
       if (!user) {
         return res
@@ -180,9 +182,7 @@ class UserController {
           .json({ status: 'error', message: 'User not found' });
       }
 
-      return res
-        .status(200)
-        .json({ status: 'success', message: 'User updated' });
+      return res.status(200).json(userWithoutPassword);
     } catch (error) {
       console.error(error);
       return res

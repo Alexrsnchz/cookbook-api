@@ -30,10 +30,18 @@ class User {
   }
 
   static async update(id, data) {
-    return prisma.user.update({
-      where: { id },
-      data: data,
-    });
+    try {
+      return await prisma.user.update({
+        where: { id },
+        data: data,
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        return null;
+      }
+
+      throw error;
+    }
   }
 
   static async delete(id) {

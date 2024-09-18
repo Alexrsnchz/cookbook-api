@@ -17,3 +17,5 @@ app.use('/api/users', usersRouter);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+export default app;
