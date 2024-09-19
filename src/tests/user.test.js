@@ -1,5 +1,23 @@
 import request from 'supertest';
-import app from '../index.js';
+import createApp from '../indexTest.js';
+import prisma from '../../prisma.js';
+
+let server;
+let app;
+
+beforeAll(() => {
+  // Creates a new server.
+  app = createApp();
+  // Listens on a random port.
+  server = app.listen(0);
+});
+
+afterAll(async () => {
+  // Closes prisma database connection.
+  await prisma.$disconnect();
+  // Closes test server.
+  server.close();
+});
 
 describe('User HTTP requests', () => {
   const user = {
@@ -100,32 +118,88 @@ describe('User HTTP requests', () => {
     expect(res.body).toEqual({});
   });
 
-  // it('No inicia sesión con datos inválidos', async () => {
-  //   const res = await request(app).post('/api/users/login').send({
-  //     email: 'invalid@email.com',
-  //     password: 'invalid',
-  //   });
+  it('Cannot register a user with invalid data', async () => {
+    const res = await request(app).post('/api/users/register').send({
+      username: 'A',
+      email: 'aoe@',
+      password: 'A',
+    });
 
-  //   expect(res.statusCode).toBe(401);
-  // });
+    // Status code is 400.
+    expect(res.statusCode).toBe(400);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
 
-  // it('Usuario a obtener no existe', async () => {
-  //   const res = await request(app).get('/api/users/99999');
+  it('Cannot register a user with an existing username/email', async () => {
+    const res = await request(app).post('/api/users/register').send({
+      username: 'Patroclo',
+      email: 'patroclo@email.com',
+      password: 'Password7_',
+    });
 
-  //   expect(res.statusCode).toBe(404);
-  // });
+    // Status code is 409.
+    expect(res.statusCode).toBe(409);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
 
-  // it('Usuario a actualizar no existe', async () => {
-  //   const res = await request(app).patch('/api/users/99999').send({
-  //     username: 'PatataPocha',
-  //   });
+  it('Cannot log in a user with non-existent data', async () => {
+    const res = await request(app).post('/api/users/login').send({
+      email: 'non-existent@email.com',
+      password: 'non-existent',
+    });
 
-  //   expect(res.statusCode).toBe(404);
-  // });
+    // Status code is 401.
+    expect(res.statusCode).toBe(401);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
 
-  // it('Usuario a eliminar no existe', async () => {
-  //   const res = await request(app).delete('/api/users/99999');
+  it('Cannot find the requested user', async () => {
+    const res = await request(app).get('/api/users/99999');
 
-  //   expect(res.statusCode).toBe(404);
-  // });
+    // Status code is 404.
+    expect(res.statusCode).toBe(404);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
+
+  it('Cannot find the requested user to update', async () => {
+    const res = await request(app).patch('/api/users/99999').send({
+      username: 'PatataPocha',
+    });
+
+    // Status code is 404.
+    expect(res.statusCode).toBe(404);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
+
+  it('Cannot find the requested user to delete', async () => {
+    const res = await request(app).delete('/api/users/99999');
+
+    // Status code is 404.
+    expect(res.statusCode).toBe(404);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
 });

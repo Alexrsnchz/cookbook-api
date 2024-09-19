@@ -174,13 +174,14 @@ class UserController {
     try {
       const validatedData = userUpdateSchema.parse(data);
       const user = await User.update(Number(id), validatedData);
-      const { password, ...userWithoutPassword } = user;
 
       if (!user) {
         return res
           .status(404)
           .json({ status: 'error', message: 'User not found' });
       }
+
+      const { password, ...userWithoutPassword } = user;
 
       return res.status(200).json(userWithoutPassword);
     } catch (error) {
