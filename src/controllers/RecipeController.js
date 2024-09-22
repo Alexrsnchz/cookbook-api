@@ -14,26 +14,6 @@ class RecipeController {
     }
   }
 
-  static async getAllRecipesByAuthor(req, res) {
-    const { authorId } = req.params;
-    try {
-      const recipes = await Recipe.getAllByAuthor(Number(authorId));
-
-      if (!recipes) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: 'Author not found' });
-      }
-
-      return res.status(200).json(recipes);
-    } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ status: 'error', message: 'Error fetching recipes' });
-    }
-  }
-
   static async getRecipeById(req, res) {
     const { id } = req.params;
 

@@ -5,12 +5,6 @@ class Recipe {
     return prisma.recipe.findMany();
   }
 
-  static async getAllByAuthor(authorId) {
-    return prisma.recipe.findMany({
-      where: { authorId },
-    });
-  }
-
   static async getById(id) {
     return prisma.recipe.findUnique({
       where: { id },
