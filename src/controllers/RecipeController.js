@@ -1,4 +1,9 @@
-import Recipe from '../models/Recipe';
+import Recipe from '../models/Recipe.js';
+import { z } from 'zod';
+import {
+  baseRecipeSchema,
+  recipeUpdateSchema,
+} from './../validations/RecipeSchema.js';
 
 class RecipeController {
   static async getAllRecipes(req, res) {
@@ -39,11 +44,27 @@ class RecipeController {
     const data = req.body;
 
     try {
-      const recipe = await Recipe.create(data);
+      const validatedData = baseRecipeSchema.parse(data);
+      const recipe = await Recipe.create({
+        ...validatedData,
+        authorId: data.authorId,
+      });
 
       return res.status(201).json(recipe);
     } catch (error) {
       console.error(error);
+
+      if (error instanceof z.ZodError) {
+        const formattedErrors = error.errors.map((err) => ({
+          message: err.message,
+          path: err.path,
+        }));
+
+        return res
+          .status(400)
+          .json({ status: 'error', message: formattedErrors });
+      }
+
       return res
         .status(500)
         .json({ status: 'error', message: 'Error creating recipe' });
@@ -55,7 +76,8 @@ class RecipeController {
     const data = req.body;
 
     try {
-      const recipe = await Recipe.update(Number(id), data);
+      const validatedData = recipeUpdateSchema.parse(data);
+      const recipe = await Recipe.update(Number(id), validatedData);
 
       if (!recipe) {
         return res
@@ -63,9 +85,21 @@ class RecipeController {
           .json({ status: 'error', message: 'Recipe not found' });
       }
 
-      return;
+      return res.status(200).json(recipe);
     } catch (error) {
       console.error(error);
+
+      if (error instanceof z.ZodError) {
+        const formattedErrors = error.errors.map((err) => ({
+          message: err.message,
+          path: err.path,
+        }));
+
+        return res
+          .status(400)
+          .json({ status: 'error', message: formattedErrors });
+      }
+
       return res
         .status(500)
         .json({ status: 'error', message: 'Error updating recipe' });

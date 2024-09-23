@@ -86,7 +86,7 @@ class UserController {
 
       return res
         .status(201)
-        .cookie('token', token, {
+        .cookie('access_token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           maxAge: 3600000,
@@ -141,7 +141,7 @@ class UserController {
 
       return res
         .status(200)
-        .cookie('token', token, {
+        .cookie('access_token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           maxAge: 3600000,

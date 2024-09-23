@@ -2,24 +2,29 @@ import prisma from '../../prisma.js';
 
 class Recipe {
   static async getAll() {
-    return prisma.recipe.findMany();
+    return await prisma.recipe.findMany();
   }
 
   static async getById(id) {
-    return prisma.recipe.findUnique({
+    return await prisma.recipe.findUnique({
       where: { id },
     });
   }
 
   static async create(data) {
-    return prisma.recipe.create({
-      data: data,
+    const { authorId, ...recipeData } = data;
+
+    return await prisma.recipe.create({
+      data: {
+        ...recipeData,
+        author: { connect: { id: authorId } },
+      },
     });
   }
 
   static async update(id, data) {
     try {
-      return prisma.recipe.update({
+      return await prisma.recipe.update({
         where: { id },
         data: data,
       });
@@ -34,7 +39,7 @@ class Recipe {
 
   static async delete(id) {
     try {
-      return prisma.recipe.delete({
+      return await prisma.recipe.delete({
         where: { id },
       });
     } catch (error) {

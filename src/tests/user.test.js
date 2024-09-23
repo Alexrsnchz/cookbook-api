@@ -41,9 +41,9 @@ describe('User HTTP requests', () => {
     expect(res.body).toHaveProperty('email', user.email);
     // Response headers contains a cookie.
     expect(res.headers['set-cookie']).toBeDefined();
-    // Response cookie contains a token.
+    // Response cookie contains the access token.
     const tokenCookie = res.headers['set-cookie'].find((cookie) =>
-      cookie.startsWith('token=')
+      cookie.startsWith('access_token=')
     );
     expect(tokenCookie).toBeDefined();
   });
@@ -63,9 +63,9 @@ describe('User HTTP requests', () => {
     expect(res.body).toHaveProperty('message', 'User logged in');
     // Response headers contains a cookie.
     expect(res.headers['set-cookie']).toBeDefined();
-    // Response cookie contains a token.
+    // Response cookie contains the access token.
     const tokenCookie = res.headers['set-cookie'].find((cookie) =>
-      cookie.startsWith('token=')
+      cookie.startsWith('access_token=')
     );
     expect(tokenCookie).toBeDefined();
   });
