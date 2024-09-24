@@ -40,7 +40,7 @@ describe('User HTTP requests', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body).toHaveProperty('username', user.username);
     expect(res.body).toHaveProperty('email', user.email);
-    // Response headers contains a cookie.
+    // Response headers contains the access token.
     expect(res.headers['set-cookie']).toBeDefined();
     // Response cookie contains the access token.
     tokenCookie = res.headers['set-cookie'].find((cookie) =>
