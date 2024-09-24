@@ -16,7 +16,9 @@ class UserController {
     try {
       const users = await User.getAll();
 
-      return res.status(200).json(users);
+      const usersWithoutPassword = users.map(({ password, ...user }) => user);
+
+      return res.status(200).json(usersWithoutPassword);
     } catch (error) {
       console.error(error);
       return res
@@ -37,7 +39,9 @@ class UserController {
           .json({ status: 'error', message: 'User not found' });
       }
 
-      return res.status(200).json(user);
+      const { password, ...userWithoutPassword } = user;
+
+      return res.status(200).json(userWithoutPassword);
     } catch (error) {
       console.error(error);
       return res
@@ -78,11 +82,12 @@ class UserController {
       validatedData.password = hash;
 
       const user = await User.create(validatedData);
-      const { password, ...userWithoutPassword } = user;
 
       const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET_KEY, {
         expiresIn: '1h',
       });
+
+      const { password, ...userWithoutPassword } = user;
 
       return res
         .status(201)
