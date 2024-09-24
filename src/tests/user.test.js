@@ -213,4 +213,30 @@ describe('User HTTP requests', () => {
     expect(res.body).toHaveProperty('status', 'error');
     expect(res.body).toHaveProperty('message');
   });
+
+  it('Cannot update a user without being logged in', async () => {
+    const res = await request(app).patch(`/api/users/${userId}`).send({
+      username: 'PatataPocha',
+    });
+
+    // Status code is 401.
+    expect(res.statusCode).toBe(401);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
+
+  it('Cannot delete a user without being logged in', async () => {
+    const res = await request(app).delete(`/api/users/${userId}`);
+
+    // Status code is 401.
+    expect(res.statusCode).toBe(401);
+    // Response body is an object.
+    expect(res.body).toBeInstanceOf(Object);
+    // Response body has status and message properties.
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('message');
+  });
 });
