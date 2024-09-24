@@ -26,6 +26,7 @@ describe('User HTTP requests', () => {
     password: 'Password7_',
   };
   let userId;
+  let tokenCookie;
 
   it('Registers a user', async () => {
     const res = await request(app).post('/api/users/register').send(user);
@@ -42,7 +43,7 @@ describe('User HTTP requests', () => {
     // Response headers contains a cookie.
     expect(res.headers['set-cookie']).toBeDefined();
     // Response cookie contains the access token.
-    const tokenCookie = res.headers['set-cookie'].find((cookie) =>
+    tokenCookie = res.headers['set-cookie'].find((cookie) =>
       cookie.startsWith('access_token=')
     );
     expect(tokenCookie).toBeDefined();
@@ -64,7 +65,7 @@ describe('User HTTP requests', () => {
     // Response headers contains a cookie.
     expect(res.headers['set-cookie']).toBeDefined();
     // Response cookie contains the access token.
-    const tokenCookie = res.headers['set-cookie'].find((cookie) =>
+    tokenCookie = res.headers['set-cookie'].find((cookie) =>
       cookie.startsWith('access_token=')
     );
     expect(tokenCookie).toBeDefined();
@@ -95,9 +96,12 @@ describe('User HTTP requests', () => {
   });
 
   it('Updates a user', async () => {
-    const res = await request(app).patch(`/api/users/${userId}`).send({
-      username: 'PatataPocha',
-    });
+    const res = await request(app)
+      .patch(`/api/users/${userId}`)
+      .set('Cookie', tokenCookie)
+      .send({
+        username: 'PatataPocha',
+      });
 
     // Status code is 200.
     expect(res.statusCode).toBe(200);
@@ -110,7 +114,9 @@ describe('User HTTP requests', () => {
   });
 
   it('Deletes a user', async () => {
-    const res = await request(app).delete(`/api/users/${userId}`);
+    const res = await request(app)
+      .delete(`/api/users/${userId}`)
+      .set('Cookie', tokenCookie);
 
     // Status code is 204.
     expect(res.statusCode).toBe(204);
@@ -178,9 +184,12 @@ describe('User HTTP requests', () => {
   });
 
   it('Cannot find the requested user to update', async () => {
-    const res = await request(app).patch('/api/users/99999').send({
-      username: 'PatataPocha',
-    });
+    const res = await request(app)
+      .patch('/api/users/99999')
+      .set('Cookie', tokenCookie)
+      .send({
+        username: 'PatataPocha',
+      });
 
     // Status code is 404.
     expect(res.statusCode).toBe(404);
@@ -192,7 +201,9 @@ describe('User HTTP requests', () => {
   });
 
   it('Cannot find the requested user to delete', async () => {
-    const res = await request(app).delete('/api/users/99999');
+    const res = await request(app)
+      .delete('/api/users/99999')
+      .set('Cookie', tokenCookie);
 
     // Status code is 404.
     expect(res.statusCode).toBe(404);
