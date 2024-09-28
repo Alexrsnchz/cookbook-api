@@ -12,7 +12,6 @@ class RecipeController {
 
       return res.status(200).json(recipes);
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error fetching recipes' });
@@ -33,7 +32,6 @@ class RecipeController {
 
       return res.status(200).json(recipe);
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error fetching recipe' });
@@ -47,13 +45,11 @@ class RecipeController {
       const validatedData = baseRecipeSchema.parse(data);
       const recipe = await Recipe.create({
         ...validatedData,
-        authorId: data.authorId,
+        authorId: req.user.id,
       });
 
       return res.status(201).json(recipe);
     } catch (error) {
-      console.error(error);
-
       if (error instanceof z.ZodError) {
         const formattedErrors = error.errors.map((err) => ({
           message: err.message,
@@ -77,18 +73,10 @@ class RecipeController {
 
     try {
       const validatedData = recipeUpdateSchema.parse(data);
-      const recipe = await Recipe.update(Number(id), validatedData);
+      const updatedRecipe = await Recipe.update(Number(id), validatedData);
 
-      if (!recipe) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: 'Recipe not found' });
-      }
-
-      return res.status(200).json(recipe);
+      return res.status(200).json(updatedRecipe);
     } catch (error) {
-      console.error(error);
-
       if (error instanceof z.ZodError) {
         const formattedErrors = error.errors.map((err) => ({
           message: err.message,
@@ -110,17 +98,10 @@ class RecipeController {
     const { id } = req.params;
 
     try {
-      const recipe = await Recipe.delete(Number(id));
-
-      if (!recipe) {
-        return res
-          .status(404)
-          .json({ status: 'error', message: 'Recipe not found' });
-      }
+      await Recipe.delete(Number(id));
 
       return res.status(204).send();
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error deleting recipe' });

@@ -20,7 +20,6 @@ class UserController {
 
       return res.status(200).json(usersWithoutPassword);
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error fetching users' });
@@ -43,7 +42,6 @@ class UserController {
 
       return res.status(200).json(userWithoutPassword);
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error fetching user' });
@@ -78,7 +76,6 @@ class UserController {
 
       const saltRounds = 10;
       const hash = await bcrypt.hash(validatedData.password, saltRounds);
-
       validatedData.password = hash;
 
       const user = await User.create(validatedData);
@@ -99,13 +96,12 @@ class UserController {
         })
         .json(userWithoutPassword);
     } catch (error) {
-      console.error(error);
-
       if (error instanceof z.ZodError) {
         const formattedErrors = error.errors.map((err) => ({
           message: err.message,
           path: err.path,
         }));
+
         return res
           .status(400)
           .json({ status: 'error', message: formattedErrors });
@@ -154,13 +150,12 @@ class UserController {
         })
         .json({ status: 'success', message: 'User logged in' });
     } catch (error) {
-      console.error(error);
-
       if (error instanceof z.ZodError) {
         const formattedErrors = error.errors.map((err) => ({
           message: err.message,
           path: err.path,
         }));
+
         return res
           .status(400)
           .json({ status: 'error', message: formattedErrors });
@@ -190,7 +185,6 @@ class UserController {
 
       return res.status(200).json(userWithoutPassword);
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error updating user' });
@@ -211,7 +205,6 @@ class UserController {
 
       return res.status(204).send();
     } catch (error) {
-      console.error(error);
       return res
         .status(500)
         .json({ status: 'error', message: 'Error deleting user' });

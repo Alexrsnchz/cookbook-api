@@ -3,13 +3,13 @@ import config from '../config/settings.js';
 
 const { JWT_SECRET_KEY } = config;
 
-const authMiddleware = (req, res, next) => {
+const authenticationMiddleware = (req, res, next) => {
   const token = req.cookies.access_token;
 
   if (!token) {
     return res
       .status(401)
-      .json({ status: 'error', message: 'User unauthenticated' });
+      .json({ status: 'error', message: 'Access token is missing' });
   }
 
   try {
@@ -20,8 +20,8 @@ const authMiddleware = (req, res, next) => {
   } catch (error) {
     return res
       .status(401)
-      .json({ status: 'error', message: 'Invalid or expired token' });
+      .json({ status: 'error', message: 'Invalid or expired access token' });
   }
 };
 
-export default authMiddleware;
+export default authenticationMiddleware;
