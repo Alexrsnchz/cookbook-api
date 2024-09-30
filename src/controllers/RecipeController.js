@@ -73,9 +73,9 @@ class RecipeController {
 
     try {
       const validatedData = recipeUpdateSchema.parse(data);
-      const updatedRecipe = await Recipe.update(Number(id), validatedData);
+      const recipe = await Recipe.update(Number(id), validatedData);
 
-      return res.status(200).json(updatedRecipe);
+      return res.status(200).json(recipe);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const formattedErrors = error.errors.map((err) => ({
