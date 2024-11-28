@@ -1,7 +1,7 @@
 import cors from 'cors';
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: 'https://cookbook-web-murex.vercel.app/login',
   credentials: true,
 };
 
