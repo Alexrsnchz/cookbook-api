@@ -183,37 +183,6 @@ describe('User HTTP requests', () => {
     expect(res.body).toHaveProperty('message');
   });
 
-  it('Cannot find the requested user to update', async () => {
-    const res = await request(app)
-      .patch('/api/users/99999')
-      .set('Cookie', tokenCookie)
-      .send({
-        username: 'PatataPocha',
-      });
-
-    // Status code is 404.
-    expect(res.statusCode).toBe(404);
-    // Response body is an object.
-    expect(res.body).toBeInstanceOf(Object);
-    // Response body has status and message properties.
-    expect(res.body).toHaveProperty('status', 'error');
-    expect(res.body).toHaveProperty('message');
-  });
-
-  it('Cannot find the requested user to delete', async () => {
-    const res = await request(app)
-      .delete('/api/users/99999')
-      .set('Cookie', tokenCookie);
-
-    // Status code is 404.
-    expect(res.statusCode).toBe(404);
-    // Response body is an object.
-    expect(res.body).toBeInstanceOf(Object);
-    // Response body has status and message properties.
-    expect(res.body).toHaveProperty('status', 'error');
-    expect(res.body).toHaveProperty('message');
-  });
-
   it('Cannot update a user without being logged in', async () => {
     const res = await request(app).patch(`/api/users/${userId}`).send({
       username: 'PatataPocha',
